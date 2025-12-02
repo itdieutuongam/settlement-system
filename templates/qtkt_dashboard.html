@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - DTA SPACE</title>
+    <style>
+        body {font-family: Arial, sans-serif; background:#f0f2f5; margin:0; padding:20px;}
+        .container {max-width:1200px; margin:auto; background:white; border-radius:16px; padding:35px; box-shadow:0 10px 30px rgba(0,0,0,0.12); overflow:hidden;}
+        h1 {color:#a41017; text-align:center; margin-bottom:30px; font-size:28px; text-transform:uppercase; letter-spacing:1px;}
+        .user-info {text-align:right; font-size:15px; margin-bottom:20px; color:#555;}
+        .logout {color:#d32f2f; font-weight:bold; text-decoration:none;}
+        .header-links a {margin:0 12px; color:#a41017; font-weight:bold; text-decoration:none; font-size:15px;}
+        .header-links a:hover {text-decoration:underline;}
+        .card {background:#fff; border-radius:12px; padding:25px; margin:25px 0; box-shadow:0 4px 20px rgba(0,0,0,0.08); border:1px solid #f0e1e1;}
+        h2 {color:#a41017; border-bottom:3px solid #a41017; padding-bottom:12px; margin-bottom:20px; font-size:22px;}
+        
+        table {width:100%; border-collapse:collapse; margin-top:15px; font-size:15px;}
+        th {background:#a41017; color:white; padding:16px 12px; text-align:center; font-weight:bold;}
+        td {padding:14px 12px; border-bottom:1px solid #eee; text-align:center; vertical-align:middle;}
+        tr:hover {background:#fdf2f4;}
+        tr:last-child td {border-bottom:none;}
+        
+        /* NÚT ĐẸP CHUẨN – SỬA CHỖ NÀY LÀ XONG */
+        .btn {
+            display: inline-block;
+            padding: 11px 22px !important;
+            background: #a41017;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(164,16,23,0.3);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background: #8B0000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(164,16,23,0.4);
+        }
+        
+        .status-cho {color:#ff9800; font-weight:bold;}
+        .status-duyet {color:#2e7d32; font-weight:bold;}
+        .empty {text-align:center; color:#666; font-style:italic; padding:60px 20px; font-size:19px; background:#f9f9f9; border-radius:12px;}
+        
+        .money {font-weight:bold; color:#a41017; font-size:1.1em;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>HỆ THỐNG QUYẾT TOÁN TẠM ỨNG</h1>
+    
+    <div class="user-info">
+        Xin chào <strong>{{ user.name }}</strong> ({{ user.role }})<br>
+        <div class="header-links">
+            <a href="{{ url_for('qtkt_form') }}">Tạo quyết toán mới</a> |
+            <a href="{{ url_for('qtkt_list') }}">Xem tất cả quyết toán</a> |
+            <a href="{{ url_for('logout') }}" class="logout">Đăng xuất</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="color:#a41017; border-bottom:2px solid #a41017; padding-bottom:10px;">
+            DANH SÁCH QUYẾT TOÁN CHỜ BẠN DUYỆT ({{ pending|length }})
+        </h2>
+
+        {% if pending %}
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Ngày gửi</th>
+                <th>Phòng ban</th>
+                <th>Thành phố</th>
+                <th>Số tiền tạm ứng</th>
+                <th>Lý do</th>
+                <th>Người đề nghị</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            {% for f in pending %}
+            <tr>
+                <td><strong>#{{ f[0] }}</strong></td>
+                <td>{{ f[3] }}</td>
+                <td>{{ f[4] }}</td>
+                <td><strong>{{ f[8] if f[8] in ['HÀ NỘI', 'HỒ CHÍ MINH'] else '—' }}</strong></td>
+                <td style="text-align:right; color:#a41017; font-weight:bold;">
+                    {{ "{:,.0f}".format(f[5]) }} VND
+                </td>
+                <td style="text-align:left; max-width:250px;">
+                    {{ f[7]|default("")|truncate(50) }}...
+                </td>
+                <td>{{ f[2] }}</td>
+                <td>
+                <span class="status-cho">
+                    {% if f[17] == 'Đã duyệt' %}
+                        Đã duyệt
+                    {% elif f[17] == 'Từ chối' %}
+                        Từ chối
+                    {% else %}
+                        Chờ {{ f[18].split(' - ')[0] if f[18] else "duyệt" }}
+                    {% endif %}
+                </span>
+                </td>
+                <td>
+                    <a href="{{ url_for('approve', form_id=f[0]) }}" class="btn">Duyệt ngay</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p class="empty">Hiện tại không có quyết toán nào đang chờ bạn duyệt.</p>
+        {% endif %}
+    </div>
+
+    <div style="text-align:center; color:#888; margin-top:40px;">
+        © 2025 Công ty CP Diệu Tướng Am - Hệ thống DTA SPACE
+    </div>
+</div>
+</body>
+</html>

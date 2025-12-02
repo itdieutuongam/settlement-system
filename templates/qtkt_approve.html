@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyệt Quyết Toán #{{ form[0] }} - DTA SPACE</title>
+    <style>
+        body {font-family: Arial, sans-serif; background:#f4f6f9; margin:0; padding:20px;}
+        .container {max-width:1000px; margin:auto; background:white; border-radius:12px; padding:30px; box-shadow:0 5px 25px rgba(0,0,0,0.1);}
+        h1 {color:#a41017; text-align:center; font-size:26px;}
+        .info-grid {display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:25px 0;}
+        .info-item {background:#f8f9fa; padding:18px; border-radius:8px; border-left:5px solid #a41017;}
+        .info-item strong {color:#a41017; font-weight:bold;}
+        table {width:100%; border-collapse:collapse; margin:30px 0; font-size:15px;}
+        th {background:#a41017; color:white; padding:14px; font-weight:bold;}
+        td {padding:12px; border:1px solid #ddd; text-align:center; vertical-align:middle;}
+        td:nth-child(4) {text-align:left;}
+        tr:hover {background:#fdf2f4;}
+        .btn {
+            padding:14px 32px; margin:12px; border:none; border-radius:10px; 
+            font-size:17px; font-weight:bold; cursor:pointer; min-width:180px;
+            transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-approve {background:#2e7d32; color:white;}
+        .btn-reject {background:#d32f2f; color:white;}
+        .btn:hover {opacity:0.92; transform:scale(1.05);}
+        .back {text-align:center; margin:40px 0;}
+        .back a {color:#a41017; text-decoration:none; font-weight:bold; font-size:16px;}
+        .file-link {color:#a41017; font-weight:bold; text-decoration:underline;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>DUYỆT QUYẾT TOÁN TẠM ỨNG #{{ form[0] }}</h1>
+
+    <div style="text-align:right; margin-bottom:20px; color:#555;">
+        <strong>{{ user.name }}</strong> - {{ user.role }}<br>
+        <a href="{{ url_for('dashboard') }}" class="back">← Về trang chủ</a>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Người đề nghị:</strong> {{ form[2] }}<br>
+            <strong>Phòng ban:</strong> {{ form[4] }}
+        </div>
+        <div class="info-item">
+            <strong>Thành phố:</strong> {{ form[8] or "Không xác định" }}<br>
+            <strong>Ngày gửi:</strong> {{ form[3] }}
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Số tiền tạm ứng:</strong> 
+            <span style="color:#a41017; font-size:1.5em; font-weight:bold;">{{ "{:,.0f}".format(form[5]) }} VND</span><br>
+            <strong>Ngày tạm ứng:</strong> {{ form[6] }}
+        </div>
+        <div class="info-item">
+            <strong>Tổng thanh toán thực tế:</strong> 
+            <span style="font-size:1.5em; font-weight:bold;">{{ "{:,.0f}".format(form[5]) }} VND</span><br>
+            <strong>Kết quả:</strong> <span style="color:#a41017; font-size:1.3em;">{{ form[14] }}</span>
+        </div>
+    </div>
+
+    <div class="info-item" style="grid-column:1/-1;">
+        <strong>Lý do tạm ứng:</strong><br>
+        <div style="background:white; padding:15px; border-radius:8px; margin-top:8px;">
+            {{ form[7] }}
+        </div>
+    </div>
+
+    {% if form[10] or form[11] %}
+    <div class="info-item" style="grid-column:1/-1;">
+        <strong>Nơi phát sinh chi:</strong> {{ form[10] or "—" }} | 
+        <strong>Mã dự án:</strong> {{ form[11] or "Không có" }}
+    </div>
+    {% endif %}
+
+    {% if form[15] %}
+    <p style="text-align:center; margin:25px 0;">
+        <strong>Tệp đính kèm:</strong> 
+        <a href="{{ url_for('uploaded_file', filename=form[15]) }}" target="_blank" class="file-link">
+            Xem tệp đính kèm
+        </a>
+    </p>
+    {% endif %}
+
+    <form method="POST" style="text-align:center; margin:50px 0;">
+        {% if not is_bod %}
+        <p style="margin-bottom:15px;">
+            <strong>Chuyển tiếp cho (nếu duyệt):</strong>
+        </p>
+        <select name="next_approver" required style="padding:12px; font-size:16px; width:420px; max-width:100%; border-radius:8px; border:2px solid #a41017;">
+            <option value="">-- Chọn người duyệt tiếp theo --</option>
+            {% for app in approvers %}
+            <option value="{{ app }}">{{ app }}</option>
+            {% endfor %}
+        </select>
+        <br><br><br>
+        {% endif %}
+
+        <button type="submit" name="decision" value="approve" class="btn btn-approve">
+            {% if is_bod %}HOÀN TẤT DUYỆT{% else %}DUYỆT & CHUYỂN TIẾP{% endif %}
+        </button>
+
+        <button type="submit" name="decision" value="reject" class="btn btn-reject">
+            TỪ CHỐI
+        </button>
+    </form>
+
+    <div class="back">
+        <a href="{{ url_for('dashboard') }}">← Quay lại danh sách chờ duyệt</a>
+    </div>
+</div>
+</body>
+</html>
